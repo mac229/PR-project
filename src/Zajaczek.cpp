@@ -1,4 +1,4 @@
-#include "Zajaczek.h"
+#include "../inc/Zajaczek.h"
 
 Zajaczek::Zajaczek()
 {

@@ -2,6 +2,10 @@
 #include <queue>
 #include <iostream>
 
+#include "../inc/Zajaczek.h"
+#include "../inc/Niedzwiedz.h"
+#include "../inc/LamportClock.h"
+
 using namespace std;
 
 int main(int argc, char** argv) {

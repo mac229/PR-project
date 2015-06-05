@@ -1,4 +1,4 @@
-#include "Niedzwiedz.h"
+#include "../inc/Niedzwiedz.h"
 
 Niedzwiedz::Niedzwiedz()
 {
