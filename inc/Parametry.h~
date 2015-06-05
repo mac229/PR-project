@@ -1,14 +1,20 @@
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
+#ifndef PARAMETRY_H
+#define PARAMETRY_H
 
 
-class Parameters
+class Parametry
 {
     public:
-        Parameters();
-        virtual ~Parameters();
+	static int niedzwiedzie;
+	static int zajaczki;
+	static int polany;
+	static int pojemnosc;
+	static void init(int argc, char** argv);
+
+        Parametry();
+        virtual ~Parametry();
     protected:
     private:
 };
 
-#endif // PARAMETERS_H
+#endif // PARAMETRY_H
