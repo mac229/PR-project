@@ -1,8 +1,9 @@
 #ifndef ZAJACZEK_H
 #define ZAJACZEK_H
 
+#include "../inc/Zwierz.h"
 
-class Zajaczek
+class Zajaczek : public Zwierz 
 {
     public:
         Zajaczek();

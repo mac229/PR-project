@@ -2,7 +2,8 @@
 
 Zajaczek::Zajaczek()
 {
-    //ctor
+    wielkosc = 1;
+    alkohol = 1;
 }
 
 Zajaczek::~Zajaczek()

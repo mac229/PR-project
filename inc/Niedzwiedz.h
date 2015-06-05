@@ -1,8 +1,9 @@
 #ifndef NIEDZWIEDZ_H
 #define NIEDZWIEDZ_H
 
+#include "../inc/Zwierz.h"
 
-class Niedzwiedz
+class Niedzwiedz : public Zwierz
 {
     public:
         Niedzwiedz();

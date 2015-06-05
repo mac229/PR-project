@@ -2,7 +2,8 @@
 
 Niedzwiedz::Niedzwiedz()
 {
-    //ctor
+    wielkosc = 4;
+    alkohol = 0;
 }
 
 Niedzwiedz::~Niedzwiedz()
