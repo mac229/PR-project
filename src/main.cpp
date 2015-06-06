@@ -19,11 +19,13 @@ int main(int argc, char** argv) {
    initMPI(rank, size);
 
    if (Parametry::init(lista, argc, argv, size)){
+      lista[rank].polana = rand() % Parametry::polany;
+
       if(rank == 0){
-         lista[rank].polana = rand() % Parametry::polany;
          cout << "Moja polana to: " << lista[rank].polana << endl;
          for(unsigned int i = 0; i < lista.size(); i++)
             cout << lista[i].wielkosc << endl;
+
       }
       //cout << "Hello world from process " << rank << " of " << size << endl;
    } else {

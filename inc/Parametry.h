@@ -5,6 +5,10 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <mpi.h>
+#include <ctime>
+#include <cstdlib>
+#include <cstdio>
 
 #include "../inc/Zajaczek.h"
 #include "../inc/Niedzwiedz.h"
@@ -25,6 +29,10 @@ class Parametry
          virtual ~Parametry();
     protected:
     private:
+         static void setParameters(char * argv[]);
+         static void createBears(vector <Zwierz> &lista, int size);
+         static void createBunnies(vector <Zwierz> &lista, int size);
+
 };
 
 #endif // PARAMETRY_H
