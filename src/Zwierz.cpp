@@ -2,7 +2,7 @@
 
 Zwierz::Zwierz()
 {
-   //ctor
+
 }
 
 Zwierz::~Zwierz()

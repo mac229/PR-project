@@ -1,21 +1,27 @@
-#include <mpi.h>
-
-
 #include "../inc/Parametry.h"
 #include "../inc/LamportClock.h"
 
 using namespace std;
 
+void initMPI(int &rank, int &size){
+   srand(time(NULL));                           /* starts MPI */
+   MPI_Comm_rank (MPI_COMM_WORLD, &rank);        /* get current process id */
+   MPI_Comm_size (MPI_COMM_WORLD, &size);        /* get number of processes */
+}
+
+
+
 int main(int argc, char** argv) {
    int rank, size;
    vector <Zwierz> lista;
 
-   MPI_Init (&argc, &argv);                      /* starts MPI */
-   MPI_Comm_rank (MPI_COMM_WORLD, &rank);        /* get current process id */
-   MPI_Comm_size (MPI_COMM_WORLD, &size);        /* get number of processes */
+   MPI_Init (&argc, &argv);
+   initMPI(rank, size);
 
    if (Parametry::init(lista, argc, argv, size)){
       if(rank == 0){
+         lista[rank].polana = rand() % Parametry::polany;
+         cout << "Moja polana to: " << lista[rank].polana << endl;
          for(unsigned int i = 0; i < lista.size(); i++)
             cout << lista[i].wielkosc << endl;
       }
@@ -27,4 +33,6 @@ int main(int argc, char** argv) {
    MPI_Finalize();
    return 0;
 }
+
+
 
