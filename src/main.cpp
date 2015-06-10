@@ -21,27 +21,14 @@ int main(int argc, char** argv) {
 
    if (Parametry::init(lista, argc, argv, size)){
         LamportClock *lamportClock = new LamportClock(rank);
+        LamportAlgorithm *l = new LamportAlgorithm();
         lista[rank].polana = rand() % Parametry::polany;
 
-        LamportAlgorithm *l = new LamportAlgorithm();
-
-
         if(rank == 0){
-        l->sendToAll();
-////            int wyslana = 5;
-////            int i = MPI_Send(&wyslana, 1, MPI_INT, 1, MSG_TAG, MPI_COMM_WORLD);
-////
-////            cout << "wyslalem: " << wyslana << " i: " << i << endl;
-//         cout << "Moja polana to: " << lista[rank].polana << endl;
-//         for(unsigned int i = 0; i < lista.size(); i++)
-//            cout << lista[i].wielkosc << endl;
+            l->send();
         }
         if(rank == 1){
-        l->receive();
-//        int otrzymana = 5;
-//                MPI_Status status;
-//    MPI_Recv(&otrzymana, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-//    cout << "otrzymalem: " << otrzymana << endl;
+            l->receive();
         }
     } else {
       cout << "Podano za malo argumentow" << endl;

@@ -1,24 +1,23 @@
 #include "../inc/LamportAlgorithm.h"
 #include <mpi.h>
 
-//      MPI_SEND( skąd, ile, typ, do kogo, z jakim tagiem, MPI_COMM_WORLD)
-//      MPI_Recv( gdzie, ile , jakiego typu, od kogo, z jakim tagiem, MPI_COMM_WORLD, &status);
-
 #define MSG_TAG 100
 
-void LamportAlgorithm::sendToAll(){
-    int wyslana = 5;
-    MPI::COMM_WORLD.Send(&wyslana, 4, MPI_INT, 1, MSG_TAG);
+void LamportAlgorithm::send(){
+    Message msg;
+    msg.processID = 5;
+    msg.processTime = 0;
+    MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, 1, MSG_TAG);
 
-    cout << "wyslalem: " << wyslana << endl;
+    cout << "wyslalem: " << 5 << endl;
 }
 
 void LamportAlgorithm::receive(){
-    int otrzymana = 0;
+    Message msg;
 
     MPI::Status status;
-    MPI::COMM_WORLD.Recv(&otrzymana, 4, MPI_INT, MPI::ANY_SOURCE, MPI::ANY_TAG, status);
-    cout << "otrzymalem: " << otrzymana << endl;
+    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, MPI::ANY_TAG, status);
+    cout << "otrzymalem: " << msg.processID << endl;
 }
 
 LamportAlgorithm::LamportAlgorithm()
