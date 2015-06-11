@@ -18,11 +18,12 @@ class LamportAlgorithm
         LamportClock *clock;
 
         void sendToAll(int TAG);
-        void receiveFromAll();
-	void receiveRequestFromAll();
-        
         void send(int TO, int TAG);
-        void receive();
+        
+	void receiveFromAll();
+	void receiveRequestFromAll();
+	void receiveRequest();
+        Message receive(int TAG);
 
         LamportAlgorithm();
         virtual ~LamportAlgorithm();

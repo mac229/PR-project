@@ -3,6 +3,7 @@
 void LamportAlgorithm::start(){
     addToList(clock->getID(), clock->getTime());
     sendToAll(REQUEST);
+    receiveRequestFromAll();
 
 }
 
@@ -19,12 +20,6 @@ void LamportAlgorithm::sendToAll(int TAG){
             send(i, TAG);
 }
 
-void LamportAlgorithm::receiveRequestFromAll(){                    // TODO: nie czekanie na wszystkie otrzymane wiadomosci
-    for (int i = 0; i < Parametry::processes; i++)
-        if (i != Parametry::my_id)
-            receive();
-}
-
 void LamportAlgorithm::send(int TO, int TAG){
     Message msg = createMessage();
 
@@ -36,19 +31,34 @@ void LamportAlgorithm::send(int TO, int TAG){
     " wysyla żądanie do procesu: " << TO << endl;
 }
 
-void LamportAlgorithm::receive(){
-    Message msg;
-    MPI::Status status;
+void LamportAlgorithm::receiveRequestFromAll(){
+    for (int i = 0; i < Parametry::processes; i++)
+        if (i != Parametry::my_id){
+            receiveRequest();
+            // TODO: nie czekanie na wszystkie otrzymane wiadomosci
+        }
+}
 
-    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, REQUEST, status);
-    clock->checkAndSet(msg.processTime);
-
-
-    makeAction(REQUEST);   //msg ?
+void LamportAlgorithm::receiveRequest(){
+    Message msg = receive(REQUEST);
 
     cout << "RECV\t";
     cout << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
     " otrzymal żądanie od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
+}
+
+Message LamportAlgorithm::receive(int TAG){
+    Message msg;
+    MPI::Status status;
+
+    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, TAG, status);
+    clock->checkAndSet(msg.processTime);
+    addToList(msg.processID, msg.processTime);
+
+    // makeAction(TAG);   //msg ?
+
+    return msg;
+
 }
 
 void LamportAlgorithm::makeAction(int TAG){
@@ -86,7 +96,9 @@ Message LamportAlgorithm::createMessage(){
 }
 
 void LamportAlgorithm::enterToCriticalSection(){
+
     //sleep
+
     cout << "ENTER\t";
     cout << "Proces: " << clock->getID() << " wchodzi do sekcji krytycznej z czasem: "
     << clock->getTime() << endl;
