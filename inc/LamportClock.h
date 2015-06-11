@@ -1,7 +1,6 @@
 #ifndef LAMPORTCLOCK_H
 #define LAMPORTCLOCK_H
 
-
 class LamportClock
 {
     public:

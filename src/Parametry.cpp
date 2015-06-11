@@ -24,7 +24,7 @@ bool Parametry::init(int argc, char * argv[], int size, int id){
 }
 
 void Parametry::createMe(){
-    if (my_id <= niedzwiedzie)
+    if (my_id < niedzwiedzie)
         me = new Niedzwiedz();
     else
         me = new Zajaczek();

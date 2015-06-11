@@ -9,6 +9,12 @@ void LamportAlgorithm::sendToAll(){
             send(i);
 }
 
+void LamportAlgorithm::receiveFromAll(){                    // TODO: nie czekanie na wszystkie otrzymane wiadomosci
+    for (int i = 0; i < Parametry::processes; i++)
+        if (i != Parametry::my_id)
+            receive();
+}
+
 void LamportAlgorithm::send(int to){
     Message msg;
     msg.processID = clock->getID();
@@ -19,7 +25,7 @@ void LamportAlgorithm::send(int to){
     clock->increment();
 
     cout << "Proces: " << msg.processID << " z czasem: " << msg.processTime <<
-    " wysyla zadanie do procesu: " << to << endl;
+    " wysyla żądanie do procesu: " << to << endl;
 }
 
 void LamportAlgorithm::receive(){
@@ -31,12 +37,12 @@ void LamportAlgorithm::receive(){
     clock->checkAndSet(msg.processTime);
 
     cout << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
-    " otrzymal zadanie od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
+    " otrzymal żądanie od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
 }
 
-LamportAlgorithm::LamportAlgorithm(int id)
+LamportAlgorithm::LamportAlgorithm()
 {
-    clock = new LamportClock(id);
+    clock = new LamportClock(Parametry::my_id);
 }
 
 LamportAlgorithm::~LamportAlgorithm()

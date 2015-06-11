@@ -24,7 +24,7 @@ class LamportAlgorithm
         void send(int to);
         void receive();
 
-        LamportAlgorithm(int id);
+        LamportAlgorithm();
         virtual ~LamportAlgorithm();
     protected:
     private:
