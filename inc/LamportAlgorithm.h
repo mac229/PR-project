@@ -14,8 +14,7 @@ using namespace std;
 class LamportAlgorithm
 {
     public:
-        vector< vector<int> > clockList;
-        LamportClock *clock;
+	void start();
 
         void sendToAll(int TAG);
         void send(int TO, int TAG);
@@ -23,21 +22,31 @@ class LamportAlgorithm
 	void receiveFromAll();
 	void receiveRequestFromAll();
 	void receiveRequest();
-        Message receive(int TAG);
+	void receive();
+
+	void gettedRequest(Message msg);
+	void gettedResponse(Message msg);
+	void gettedWantToo(Message msg);
+	void gettedDontWant(Message msg);
+	void gettedLeave(Message msg);
 
         LamportAlgorithm();
         virtual ~LamportAlgorithm();
     protected:
     private:
-	void start();
+	int gettedResponses;
+        vector< vector<int> > clockList;
+        LamportClock *clock;
 
 	void enterToCriticalSection();
         void leaveCriticalSection();
 
 
 	Message createMessage();
+	string showMsgType(int TAG);
 	void addToList(int id, int time);
-	void makeAction(int TAG);
+	bool canEnter();
+	void makeAction(Message msg, int TAG);
 };
 
 #endif // LAMPORTALGORITHM_H

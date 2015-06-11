@@ -1,10 +1,10 @@
 #include "../inc/LamportAlgorithm.h"
 
 void LamportAlgorithm::start(){
+    gettedResponses = 1;
     addToList(clock->getID(), clock->getTime());
     sendToAll(REQUEST);
-    receiveRequestFromAll();
-
+    receiveFromAll();
 }
 
 void LamportAlgorithm::addToList(int id, int time){
@@ -26,63 +26,90 @@ void LamportAlgorithm::send(int TO, int TAG){
     MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, TO, TAG);
     clock->increment();
 
-    cout << "SEND\t";
+    cout << "SEND->" << showMsgType(TAG) << "\t";
     cout << "Proces: " << msg.processID << " z czasem: " << msg.processTime <<
-    " wysyla żądanie do procesu: " << TO << endl;
+    " wysyla komunikat do procesu: " << TO << endl;
 }
 
-void LamportAlgorithm::receiveRequestFromAll(){
-    for (int i = 0; i < Parametry::processes; i++)
-        if (i != Parametry::my_id){
-            receiveRequest();
-            // TODO: nie czekanie na wszystkie otrzymane wiadomosci
-        }
+void LamportAlgorithm::receiveFromAll(){
+    while (gettedResponses != Parametry::processes){
+        receive();
+    }
 }
 
-void LamportAlgorithm::receiveRequest(){
-    Message msg = receive(REQUEST);
-
-    cout << "RECV\t";
-    cout << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
-    " otrzymal żądanie od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
-}
-
-Message LamportAlgorithm::receive(int TAG){
+void LamportAlgorithm::receive(){
     Message msg;
     MPI::Status status;
 
-    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, TAG, status);
+    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, MPI::ANY_TAG, status);
     clock->checkAndSet(msg.processTime);
-    addToList(msg.processID, msg.processTime);
 
-    // makeAction(TAG);   //msg ?
+    cout << "RECV->" << showMsgType(status.Get_tag()) << "\t";
+    cout << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() <<
+    " otrzymal od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
 
-    return msg;
-
+    makeAction(msg, status.Get_tag());
 }
 
-void LamportAlgorithm::makeAction(int TAG){
+void LamportAlgorithm::makeAction(Message msg, int TAG){
     switch (TAG){
         case REQUEST:
-           // cout << "REQUEST" << endl;
-            break;
-        case RESPONSE:
-            cout << "RESPONSE" << endl;
+            // cout << "REQUEST" << endl;
+            gettedRequest(msg);
             break;
         case WANT_TOO:
-            cout << "WANT_TOO" << endl;
+            //cout << "WANT_TOO" << endl;
+            gettedWantToo(msg);
             break;
         case DONT_WANT:
-            cout << "DONT_WANT" << endl;
+            //cout << "DONT_WANT" << endl;
+            gettedDontWant(msg);
             break;
         case LEAVE:
-            cout << "LEAVE" << endl;
+            //cout << "LEAVE" << endl;
+            gettedLeave(msg);
             break;
         default:
-            cout << "BRAK TAGA" << endl;
+            //cout << "BRAK TAGA" << endl;
             break;
     }
 }
+
+void LamportAlgorithm::gettedRequest(Message msg){
+    if (msg.meadow == Parametry::me->polana)
+        send(msg.processID, WANT_TOO);
+    else
+        send(msg.processID, DONT_WANT);
+}
+
+void LamportAlgorithm::gettedResponse(Message msg){
+    if (msg.meadow == Parametry::me->polana){
+
+    }
+}
+
+void LamportAlgorithm::gettedWantToo(Message msg){
+    gettedResponses++;
+    addToList(msg.processID, msg.processTime);
+
+    // if from all processes
+        // sort
+        // canEnter
+}
+
+void LamportAlgorithm::gettedDontWant(Message msg){
+    gettedResponses++;
+}
+
+void LamportAlgorithm::gettedLeave(Message msg){
+
+}
+
+bool LamportAlgorithm::canEnter(){
+    return false;
+}
+
+
 
 Message LamportAlgorithm::createMessage(){
     Message msg;
@@ -93,6 +120,22 @@ Message LamportAlgorithm::createMessage(){
     msg.meadow = Parametry::me->polana;
 
     return msg;
+}
+
+string LamportAlgorithm::showMsgType(int TAG){
+    switch (TAG){
+        case REQUEST:
+            return "REQUEST";
+        case WANT_TOO:
+            return "WANT_TOO";
+        case DONT_WANT:
+            return "DONT_WANT";
+        case LEAVE:
+            return "LEAVE";
+        default:
+            return "BRAK TAGA";
+    }
+
 }
 
 void LamportAlgorithm::enterToCriticalSection(){
@@ -119,4 +162,32 @@ LamportAlgorithm::LamportAlgorithm()
 LamportAlgorithm::~LamportAlgorithm()
 {
     //dtor
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void LamportAlgorithm::receiveRequestFromAll(){
+    for (int i = 0; i < Parametry::processes; i++){
+        if (i != Parametry::my_id){
+            receiveRequest();
+            // TODO: nie czekanie na wszystkie otrzymane wiadomosci
+            // sort
+            if (canEnter()){
+                enterToCriticalSection();
+                break;
+            }
+        }
+    }
+    if (canEnter()){
+        enterToCriticalSection();
+    }
+}
+
+void LamportAlgorithm::receiveRequest(){
+    receive();
+    Message msg; //error
+
+    cout << "RECV\t";
+    cout << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
+    " otrzymal żądanie od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
 }

@@ -14,17 +14,17 @@ int main(int argc, char** argv) {
 
    if (Parametry::init(argc, argv, size, rank)){
         LamportAlgorithm *l = new LamportAlgorithm();
+        l->start();
 
-
-        if(rank == 0){
-            l->receiveRequestFromAll();
-        } else {
-            l->send(0, REQUEST);
-        }
+//        if(rank == 0){
+//            l->receiveRequestFromAll();
+//        } else {
+//            l->send(0, REQUEST);
+//        }
 //        cout << "Jestem: " << Parametry::me->wielkosc << " id: " << rank << endl;
 
     } else {
-        cout << "Podano za malo argumentow" << endl;
+        cout << "Podano zle argumenty" << endl;
    }
 
    MPI::Finalize();
