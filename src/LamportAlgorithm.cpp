@@ -1,5 +1,17 @@
 #include "../inc/LamportAlgorithm.h"
 
+void LamportAlgorithm::start(){
+    addToList(clock->getID(), clock->getTime());
+    sendToAll(REQUEST);
+
+}
+
+void LamportAlgorithm::addToList(int id, int time){
+    vector <int> para(2);
+    para[0] = id;
+    para[1] = time;
+    clockList.push_back(para);
+}
 
 void LamportAlgorithm::sendToAll(int TAG){
     for (int i = 0; i < Parametry::processes; i++)
@@ -7,16 +19,14 @@ void LamportAlgorithm::sendToAll(int TAG){
             send(i, TAG);
 }
 
-void LamportAlgorithm::receiveFromAll(){                    // TODO: nie czekanie na wszystkie otrzymane wiadomosci
+void LamportAlgorithm::receiveRequestFromAll(){                    // TODO: nie czekanie na wszystkie otrzymane wiadomosci
     for (int i = 0; i < Parametry::processes; i++)
         if (i != Parametry::my_id)
             receive();
 }
 
 void LamportAlgorithm::send(int TO, int TAG){
-    Message msg;
-    msg.processID = clock->getID();
-    msg.processTime = clock->getTime();
+    Message msg = createMessage();
 
     MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, TO, TAG);
     clock->increment();
@@ -30,10 +40,11 @@ void LamportAlgorithm::receive(){
     Message msg;
     MPI::Status status;
 
-    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, MPI::ANY_TAG, status);
+    MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, REQUEST, status);
     clock->checkAndSet(msg.processTime);
 
-    makeAction(status.Get_tag());
+
+    makeAction(REQUEST);   //msg ?
 
     cout << "RECV\t";
     cout << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
@@ -43,7 +54,7 @@ void LamportAlgorithm::receive(){
 void LamportAlgorithm::makeAction(int TAG){
     switch (TAG){
         case REQUEST:
-            cout << "REQUEST" << endl;
+           // cout << "REQUEST" << endl;
             break;
         case RESPONSE:
             cout << "RESPONSE" << endl;
@@ -61,6 +72,17 @@ void LamportAlgorithm::makeAction(int TAG){
             cout << "BRAK TAGA" << endl;
             break;
     }
+}
+
+Message LamportAlgorithm::createMessage(){
+    Message msg;
+
+    msg.processID = clock->getID();
+    msg.processTime = clock->getTime();
+    msg.size = Parametry::me->wielkosc;
+    msg.meadow = Parametry::me->polana;
+
+    return msg;
 }
 
 void LamportAlgorithm::enterToCriticalSection(){

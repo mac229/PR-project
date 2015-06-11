@@ -4,6 +4,8 @@
 struct Message {
 	int processTime;
 	int processID;
+	int size;
+	int meadow;
 };
 
 #endif // WIADOMOSC_H

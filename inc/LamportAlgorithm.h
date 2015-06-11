@@ -14,14 +14,13 @@ using namespace std;
 class LamportAlgorithm
 {
     public:
-        vector<int> clockList;
+        vector< vector<int> > clockList;
         LamportClock *clock;
 
         void sendToAll(int TAG);
         void receiveFromAll();
-        void enterToCriticalSection();
-        void leaveCriticalSection();
-
+	void receiveRequestFromAll();
+        
         void send(int TO, int TAG);
         void receive();
 
@@ -29,6 +28,14 @@ class LamportAlgorithm
         virtual ~LamportAlgorithm();
     protected:
     private:
+	void start();
+
+	void enterToCriticalSection();
+        void leaveCriticalSection();
+
+
+	Message createMessage();
+	void addToList(int id, int time);
 	void makeAction(int TAG);
 };
 
