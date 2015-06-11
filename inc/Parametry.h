@@ -19,19 +19,25 @@ using namespace std;
 class Parametry
 {
     public:
+	 static int my_id;
+	 static int processes;
+
+	 static Zwierz *me;
+
          static int niedzwiedzie;
          static int zajaczki;
          static int polany;
          static int pojemnosc;
-         static bool init(vector <Zwierz> &lista, int argc, char * argv[], int size);
+         static bool init(int argc, char * argv[], int size, int id);
 
          Parametry();
          virtual ~Parametry();
     protected:
     private:
          static void setParameters(char * argv[]);
-         static void createBears(vector <Zwierz> &lista, int size);
-         static void createBunnies(vector <Zwierz> &lista, int size);
+	 static void createMe();
+         static void createBears(vector <Zwierz> &lista);
+         static void createBunnies(vector <Zwierz> &lista);
 
 };
 

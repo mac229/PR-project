@@ -1,21 +1,30 @@
 #ifndef LAMPORTALGORITHM_H
 #define LAMPORTALGORITHM_H
 
-#include "Wiadomosc.h"
 #include <iostream>
+#include <vector>
+
+#include "Wiadomosc.h"
+#include "LamportClock.h"
+#include "Parametry.h"
 
 using namespace std;
 
 class LamportAlgorithm
 {
     public:
+        vector<int> clockList;
+        LamportClock *clock;
+
         void sendToAll();
         void receiveFromAll();
+        void enterToCriticalSection();
+        void leaveCriticalSection();
 
-        void send();
+        void send(int to);
         void receive();
 
-        LamportAlgorithm();
+        LamportAlgorithm(int id);
         virtual ~LamportAlgorithm();
     protected:
     private:

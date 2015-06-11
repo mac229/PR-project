@@ -7,7 +7,7 @@ void LamportClock::increment(){
 void LamportClock::checkAndSet(int getted){
     if (getted > time)
         time = getted;
-    increment();
+    time++;
 }
 
 int LamportClock::getID(){
