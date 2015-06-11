@@ -14,6 +14,12 @@
 #include "../inc/Niedzwiedz.h"
 #include "../inc/Zwierz.h"
 
+#define REQUEST 100
+#define RESPONSE 200
+#define WANT_TOO 300
+#define DONT_WANT 400
+#define LEAVE 500
+
 using namespace std;
 
 class Parametry

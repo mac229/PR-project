@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
         if(rank == 0){
             l->receiveFromAll();
         } else {
-            l->send(0);
+            l->send(0, REQUEST);
         }
 //        cout << "Jestem: " << Parametry::me->wielkosc << " id: " << rank << endl;
 
