@@ -17,22 +17,6 @@ class LamportAlgorithm
     public:
 	void start();
 
-        void sendToAll(int TAG);
-        void send(int TO, int TAG);
-        
-	void receiveFromAll();
-	void receiveRequestFromAll();
-	void receiveRequest();
-	void receive();
-
-	void gettedRequest(Message msg);
-	void gettedResponse(Message msg);
-	void gettedWantToo(Message msg);
-	void gettedDontWant(Message msg);
-	void gettedLeave(Message msg);
-
-	void sorting();
-
         LamportAlgorithm();
         virtual ~LamportAlgorithm();
     protected:
@@ -44,15 +28,32 @@ class LamportAlgorithm
 
 	void resetValues();
 
+        void sendToAll(int TAG);
+        void send(int TO, int TAG);
+        
+	void receiveFromAll();
+	void receive();
+
+	void makeAction(Message msg, int TAG);
+
+	void gettedRequest(Message msg);
+	void gettedWantToo(Message msg);
+	void gettedDontWant(Message msg);
+	void gettedLeave(Message msg);
+
+	void sorting();
+
+	bool canEnter();
+	void takeAlkohol(int animals, int bears);
+
+	void mustWait();
+
 	void enterToCriticalSection();
         void leaveCriticalSection();
 
-
 	Message createMessage();
 	string showMsgType(int TAG);
-	void addToList(int id, int time);
-	bool canEnter();
-	void makeAction(Message msg, int TAG);
+	void addToList(int id, int time, int size);
 };
 
 #endif // LAMPORTALGORITHM_H

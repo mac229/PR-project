@@ -10,7 +10,8 @@ bool rosnaco(vector<int> const a, vector<int> const b)
 void showList(vector< vector<int> > list){
     cout << "----------------------------" << endl;
     for (unsigned int i = 0; i < list.size(); i++)
-        cout << "ID: " << list[i][0] << " TIME: " << list[i][1] << endl;
+        cout << "ID: " << list[i][0] << " TIME: " << list[i][1]
+        << " SIZE: " << list[i][2]<< endl;
     cout << "----------------------------" << endl;
 }
 
@@ -19,23 +20,25 @@ void LamportAlgorithm::start(){
     sendToAll(REQUEST);
     receiveFromAll();
     sorting();
-    if (canEnter()){
-        enterToCriticalSection();
-        leaveCriticalSection();
-    }
+    while (!canEnter())
+        mustWait();
+    enterToCriticalSection();
+    leaveCriticalSection();
 }
 
 void LamportAlgorithm::resetValues(){
     clockList.clear();
+
     gettedResponses = 1;
     wantParty = clock->getTime();
-    addToList(clock->getID(), wantParty);
+    addToList(clock->getID(), wantParty, Parametry::me->wielkosc);
 }
 
-void LamportAlgorithm::addToList(int id, int time){
-    vector <int> para(2);
+void LamportAlgorithm::addToList(int id, int time, int size){
+    vector <int> para(3);
     para[0] = id;
     para[1] = time;
+    para[2] = size;
     clockList.push_back(para);
 }
 
@@ -95,7 +98,7 @@ void LamportAlgorithm::makeAction(Message msg, int TAG){
             gettedLeave(msg);
             break;
         default:
-            //cout << "BRAK TAGA" << endl;
+            cout << "BRAK TAGA" << endl;
             break;
     }
 }
@@ -107,17 +110,11 @@ void LamportAlgorithm::gettedRequest(Message msg){
         send(msg.processID, DONT_WANT);
 }
 
-void LamportAlgorithm::gettedResponse(Message msg){
-    if (msg.meadow == Parametry::me->polana){
-
-    }
-}
-
 void LamportAlgorithm::gettedWantToo(Message msg){
     gettedResponses++;
-    addToList(msg.processID, msg.processTime);
+    addToList(msg.processID, msg.processTime, msg.size);
 
-    // if from all processes
+    // TODO: not wait for all
         // sort
         // canEnter
 }
@@ -128,18 +125,65 @@ void LamportAlgorithm::gettedDontWant(Message msg){
 
 void LamportAlgorithm::gettedLeave(Message msg){
 
+    // TODO: implement removing from list
 }
 
 void LamportAlgorithm::sorting(){
     sort(clockList.begin(), clockList.end(), rosnaco);
-    showList(clockList);
+    //showList(clockList);
 }
 
 bool LamportAlgorithm::canEnter(){
-    return false;
+    unsigned int i = 0, bears = 0;
+    int emptySpace = Parametry::pojemnosc;
+    bool isSpace = false;
+
+    for (i = 0; i < clockList.size(); i++){
+        if ((emptySpace - clockList[i][2]) >= 0){
+            if (clockList[i][0] == clock->getID())
+                isSpace = true;
+            if (clockList[i][2] == 4)
+                bears++;
+
+            emptySpace -= clockList[i][2];
+        } else
+            break;
+
+    }
+
+    takeAlkohol(i, bears);
+
+    return (isSpace && ((i - bears) > 0));
 }
 
+void LamportAlgorithm::takeAlkohol(int animals, int bears){
+    //TODO: implement
+}
 
+void LamportAlgorithm::mustWait(){
+    receive();
+}
+
+void LamportAlgorithm::enterToCriticalSection(){
+
+    //sleep
+
+    clock->increment();
+
+    cout << "\033[31m" << "ENTER\t" << "\033[0m";
+    cout << "Proces: " << clock->getID() << " wchodzi do sekcji krytycznej z czasem: "
+    << clock->getTime() << endl;
+}
+
+void LamportAlgorithm::leaveCriticalSection(){
+    clock->increment();
+
+    // send LEAVE
+
+    cout << "LEAVE\t";
+    cout << "Proces: " << clock->getID() << " opuszcza sekcje krytyczna z czasem: "
+    << clock->getTime() << endl;
+}
 
 Message LamportAlgorithm::createMessage(){
     Message msg;
@@ -165,22 +209,6 @@ string LamportAlgorithm::showMsgType(int TAG){
         default:
             return "BRAK TAGA";
     }
-
-}
-
-void LamportAlgorithm::enterToCriticalSection(){
-
-    //sleep
-
-    cout << "ENTER\t";
-    cout << "Proces: " << clock->getID() << " wchodzi do sekcji krytycznej z czasem: "
-    << clock->getTime() << endl;
-}
-
-void LamportAlgorithm::leaveCriticalSection(){
-    cout << "LEAVE\t";
-    cout << "Proces: " << clock->getID() << " opuszcza sekcje krytyczna z czasem: "
-    << clock->getTime() << endl;
 }
 
 LamportAlgorithm::LamportAlgorithm()
@@ -192,32 +220,4 @@ LamportAlgorithm::LamportAlgorithm()
 LamportAlgorithm::~LamportAlgorithm()
 {
     //dtor
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void LamportAlgorithm::receiveRequestFromAll(){
-    for (int i = 0; i < Parametry::processes; i++){
-        if (i != Parametry::my_id){
-            receiveRequest();
-            // TODO: nie czekanie na wszystkie otrzymane wiadomosci
-            // sort
-            if (canEnter()){
-                enterToCriticalSection();
-                break;
-            }
-        }
-    }
-    if (canEnter()){
-        enterToCriticalSection();
-    }
-}
-
-void LamportAlgorithm::receiveRequest(){
-    receive();
-    Message msg; //error
-
-    cout << "RECV\t";
-    cout << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
-    " otrzymal żądanie od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
 }
