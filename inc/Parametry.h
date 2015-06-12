@@ -34,15 +34,13 @@ class Parametry
          static int polany;
          static int pojemnosc;
          static bool init(int argc, char * argv[], int size, int id);
+	 static void createMe();
 
          Parametry();
          virtual ~Parametry();
     protected:
     private:
          static void setParameters(char * argv[]);
-	 static void createMe();
-         static void createBears(vector <Zwierz> &lista);
-         static void createBunnies(vector <Zwierz> &lista);
 
 };
 

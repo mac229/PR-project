@@ -29,6 +29,7 @@ void LamportAlgorithm::start(){
 void LamportAlgorithm::resetValues(){
     clockList.clear();
 
+    Parametry::createMe();
     gettedResponses = 1;
     wantParty = clock->getTime();
     addToList(clock->getID(), wantParty, Parametry::me->wielkosc);
@@ -120,9 +121,14 @@ void LamportAlgorithm::gettedDontWant(Message msg){
 }
 
 void LamportAlgorithm::gettedLeave(Message msg){
-
-    // TODO: implement removing from list
-
+    if (msg.meadow == Parametry::me->polana)
+        for (unsigned int i = 0; i < clockList.size(); i++)
+            if (clockList[i][1] == msg.processID){
+                clockList.erase(clockList.begin() + i);
+                break;
+            }
+    //cout << "ID: " << msg.processID;
+    //showList(clockList);
 }
 
 void LamportAlgorithm::sorting(){
@@ -157,10 +163,9 @@ bool LamportAlgorithm::canEnter(){
 }
 
 void LamportAlgorithm::takeAlkohol(int animals, int bears, int pos){
-    if ( (bears > 0) && ( (animals - bears) > 0) && (pos > 0)){
+    if ( (bears > 0) && ( (animals - bears) > 0) && (pos > 0))
         if (pos <= bears)
             Parametry::me->alkohol++;
-    }
 }
 
 void LamportAlgorithm::mustWait(){

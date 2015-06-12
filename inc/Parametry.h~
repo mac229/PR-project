@@ -15,7 +15,6 @@
 #include "../inc/Zwierz.h"
 
 #define REQUEST 100
-#define RESPONSE 200
 #define WANT_TOO 300
 #define DONT_WANT 400
 #define LEAVE 500
@@ -42,8 +41,6 @@ class Parametry
     private:
          static void setParameters(char * argv[]);
 	 static void createMe();
-         static void createBears(vector <Zwierz> &lista);
-         static void createBunnies(vector <Zwierz> &lista);
 
 };
 

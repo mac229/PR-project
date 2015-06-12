@@ -1,11 +1,11 @@
 #include "../inc/Parametry.h"
 #include "../inc/LamportAlgorithm.h"
 
+#define ITERATIONS 1
+
 using namespace std;
 
 void initMPI(int argc, char** argv, int &rank, int &size);
-
-
 
 int main(int argc, char** argv) {
    int rank, size;
@@ -13,15 +13,11 @@ int main(int argc, char** argv) {
    initMPI(argc, argv, rank, size);
 
    if (Parametry::init(argc, argv, size, rank)){
-        LamportAlgorithm *l = new LamportAlgorithm();
-        l->start();
 
-//        if(rank == 0){
-//            l->receiveRequestFromAll();
-//        } else {
-//            l->send(0, REQUEST);
-//        }
-//        cout << "Jestem: " << Parametry::me->wielkosc << " id: " << rank << endl;
+        for (unsigned int i = 0; i < ITERATIONS;  i++){
+            LamportAlgorithm *l = new LamportAlgorithm();
+            l->start();
+        }
 
     } else {
         cout << "Podano zle argumenty" << endl;
