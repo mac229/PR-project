@@ -31,13 +31,18 @@ class LamportAlgorithm
 	void gettedDontWant(Message msg);
 	void gettedLeave(Message msg);
 
+	void sorting();
+
         LamportAlgorithm();
         virtual ~LamportAlgorithm();
     protected:
     private:
 	int gettedResponses;
+	int wantParty;
         vector< vector<int> > clockList;
         LamportClock *clock;
+
+	void resetValues();
 
 	void enterToCriticalSection();
         void leaveCriticalSection();

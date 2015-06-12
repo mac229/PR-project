@@ -2,6 +2,8 @@
 
 bool rosnaco(vector<int> const a, vector<int> const b)
 {
+    if (a[1] == b[1])
+        return a[0] < b[0];
 	return a[1] < b[1];
 }
 
@@ -13,16 +15,21 @@ void showList(vector< vector<int> > list){
 }
 
 void LamportAlgorithm::start(){
-    gettedResponses = 1;
-    addToList(clock->getID(), clock->getTime());
+    resetValues();
     sendToAll(REQUEST);
     receiveFromAll();
-    sort(clockList.begin(), clockList.end(), rosnaco);
-    showList(clockList);
+    sorting();
     if (canEnter()){
         enterToCriticalSection();
         leaveCriticalSection();
     }
+}
+
+void LamportAlgorithm::resetValues(){
+    clockList.clear();
+    gettedResponses = 1;
+    wantParty = clock->getTime();
+    addToList(clock->getID(), wantParty);
 }
 
 void LamportAlgorithm::addToList(int id, int time){
@@ -123,6 +130,11 @@ void LamportAlgorithm::gettedLeave(Message msg){
 
 }
 
+void LamportAlgorithm::sorting(){
+    sort(clockList.begin(), clockList.end(), rosnaco);
+    showList(clockList);
+}
+
 bool LamportAlgorithm::canEnter(){
     return false;
 }
@@ -133,7 +145,7 @@ Message LamportAlgorithm::createMessage(){
     Message msg;
 
     msg.processID = clock->getID();
-    msg.processTime = clock->getTime();
+    msg.processTime = wantParty;
     msg.size = Parametry::me->wielkosc;
     msg.meadow = Parametry::me->polana;
 
