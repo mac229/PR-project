@@ -54,8 +54,8 @@ void LamportAlgorithm::send(int TO, int TAG){
     MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, TO, TAG);
     clock->increment();
 
-    cout << "SEND->" << showMsgType(TAG) << "\t";
-    cout << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() << //msg.processTime <<
+    cout << "SEND->" << showMsgType(TAG) << "\t"
+    << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() <<
     " wysyla komunikat do procesu: " << TO << endl;
 }
 
@@ -72,8 +72,8 @@ void LamportAlgorithm::receive(){
     MPI::COMM_WORLD.Recv(&msg, sizeof(struct Message), MPI_BYTE, MPI::ANY_SOURCE, MPI::ANY_TAG, status);
     clock->checkAndSet(msg.processTime);
 
-    cout << "RECV->" << showMsgType(status.Get_tag()) << "\t";
-    cout << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() <<
+    cout << "RECV->" << showMsgType(status.Get_tag()) << "\t"
+    << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() <<
     " otrzymal od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
 
     makeAction(msg, status.Get_tag());
@@ -82,19 +82,15 @@ void LamportAlgorithm::receive(){
 void LamportAlgorithm::makeAction(Message msg, int TAG){
     switch (TAG){
         case REQUEST:
-            // cout << "REQUEST" << endl;
             gettedRequest(msg);
             break;
         case WANT_TOO:
-            //cout << "WANT_TOO" << endl;
             gettedWantToo(msg);
             break;
         case DONT_WANT:
-            //cout << "DONT_WANT" << endl;
             gettedDontWant(msg);
             break;
         case LEAVE:
-            //cout << "LEAVE" << endl;
             gettedLeave(msg);
             break;
         default:
@@ -126,6 +122,7 @@ void LamportAlgorithm::gettedDontWant(Message msg){
 void LamportAlgorithm::gettedLeave(Message msg){
 
     // TODO: implement removing from list
+
 }
 
 void LamportAlgorithm::sorting(){
@@ -137,11 +134,14 @@ bool LamportAlgorithm::canEnter(){
     unsigned int i = 0, bears = 0;
     int emptySpace = Parametry::pojemnosc;
     bool isSpace = false;
+    int myPosition = -1;
 
     for (i = 0; i < clockList.size(); i++){
         if ((emptySpace - clockList[i][2]) >= 0){
-            if (clockList[i][0] == clock->getID())
+            if (clockList[i][0] == clock->getID()){
                 isSpace = true;
+                myPosition = i;
+            }
             if (clockList[i][2] == 4)
                 bears++;
 
@@ -151,13 +151,16 @@ bool LamportAlgorithm::canEnter(){
 
     }
 
-    takeAlkohol(i, bears);
+    takeAlkohol(i, bears, myPosition);
 
     return (isSpace && ((i - bears) > 0));
 }
 
-void LamportAlgorithm::takeAlkohol(int animals, int bears){
-    //TODO: implement
+void LamportAlgorithm::takeAlkohol(int animals, int bears, int pos){
+    if ( (bears > 0) && ( (animals - bears) > 0) && (pos > 0)){
+        if (pos <= bears)
+            Parametry::me->alkohol++;
+    }
 }
 
 void LamportAlgorithm::mustWait(){
@@ -165,23 +168,20 @@ void LamportAlgorithm::mustWait(){
 }
 
 void LamportAlgorithm::enterToCriticalSection(){
-
-    //sleep
-
     clock->increment();
 
-    cout << "\033[31m" << "ENTER\t" << "\033[0m";
-    cout << "Proces: " << clock->getID() << " wchodzi do sekcji krytycznej z czasem: "
-    << clock->getTime() << endl;
+    cout << "\033[31m" << "ENTER\t" << "\033[0m"
+    << "Proces: " << clock->getID() << " wchodzi do sekcji krytycznej z czasem: "
+    << clock->getTime() << " i z liczba butelek: " << Parametry::me->alkohol << endl;
 }
 
 void LamportAlgorithm::leaveCriticalSection(){
     clock->increment();
 
-    // send LEAVE
+    sendToAll(LEAVE);
 
-    cout << "LEAVE\t";
-    cout << "Proces: " << clock->getID() << " opuszcza sekcje krytyczna z czasem: "
+    cout << "LEAVE\t"
+    << "Proces: " << clock->getID() << " opuszcza sekcje krytyczna z czasem: "
     << clock->getTime() << endl;
 }
 
