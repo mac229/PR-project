@@ -4,6 +4,7 @@
 #include <iostream>
 #include <mpi.h>
 #include <vector>
+#include <algorithm>
 
 #include "Wiadomosc.h"
 #include "LamportClock.h"

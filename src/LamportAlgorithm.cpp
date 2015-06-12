@@ -1,10 +1,28 @@
 #include "../inc/LamportAlgorithm.h"
 
+bool rosnaco(vector<int> const a, vector<int> const b)
+{
+	return a[1] < b[1];
+}
+
+void showList(vector< vector<int> > list){
+    cout << "----------------------------" << endl;
+    for (unsigned int i = 0; i < list.size(); i++)
+        cout << "ID: " << list[i][0] << " TIME: " << list[i][1] << endl;
+    cout << "----------------------------" << endl;
+}
+
 void LamportAlgorithm::start(){
     gettedResponses = 1;
     addToList(clock->getID(), clock->getTime());
     sendToAll(REQUEST);
     receiveFromAll();
+    sort(clockList.begin(), clockList.end(), rosnaco);
+    showList(clockList);
+    if (canEnter()){
+        enterToCriticalSection();
+        leaveCriticalSection();
+    }
 }
 
 void LamportAlgorithm::addToList(int id, int time){
@@ -27,12 +45,12 @@ void LamportAlgorithm::send(int TO, int TAG){
     clock->increment();
 
     cout << "SEND->" << showMsgType(TAG) << "\t";
-    cout << "Proces: " << msg.processID << " z czasem: " << msg.processTime <<
+    cout << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() << //msg.processTime <<
     " wysyla komunikat do procesu: " << TO << endl;
 }
 
 void LamportAlgorithm::receiveFromAll(){
-    while (gettedResponses != Parametry::processes){
+    while (gettedResponses < Parametry::processes){
         receive();
     }
 }
