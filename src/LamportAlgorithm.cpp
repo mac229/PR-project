@@ -20,10 +20,23 @@ void LamportAlgorithm::start(){
     sendToAll(REQUEST);
     receiveFromAll();
     sorting();
-    while (!canEnter())
-        mustWait();
-    enterToCriticalSection();
-    leaveCriticalSection();
+
+    int flag = -1;
+    do {
+       flag = canEnter();
+       if (flag == 0){
+            enterToCriticalSection();
+            leaveCriticalSection();
+       }
+
+       if (flag == 1)
+            mustWait();
+
+       if (flag == 2)
+           sendToAll(LEAVE);
+    }
+    while ( flag == 1);
+
 }
 
 void LamportAlgorithm::resetValues(){
@@ -123,11 +136,10 @@ void LamportAlgorithm::gettedDontWant(Message msg){
 void LamportAlgorithm::gettedLeave(Message msg){
     if (msg.meadow == Parametry::me->polana)
         for (unsigned int i = 0; i < clockList.size(); i++)
-            if (clockList[i][1] == msg.processID){
+            if (clockList[i][0] == msg.processID){
                 clockList.erase(clockList.begin() + i);
                 break;
             }
-    //cout << "ID: " << msg.processID;
     //showList(clockList);
 }
 
@@ -136,8 +148,8 @@ void LamportAlgorithm::sorting(){
     //showList(clockList);
 }
 
-bool LamportAlgorithm::canEnter(){
-    unsigned int i = 0, bears = 0;
+int LamportAlgorithm::canEnter(){
+    unsigned int i = 0, bunnies = 0;
     int emptySpace = Parametry::pojemnosc;
     bool isSpace = false;
     int myPosition = -1;
@@ -148,27 +160,32 @@ bool LamportAlgorithm::canEnter(){
                 isSpace = true;
                 myPosition = i;
             }
-            if (clockList[i][2] == 4)
-                bears++;
+            if (clockList[i][2] == 1)
+                bunnies++;
 
             emptySpace -= clockList[i][2];
         } else
             break;
-
     }
 
-    takeAlkohol(i, bears, myPosition);
+    takeAlkohol(i, bunnies, myPosition);
 
-    return (isSpace && ((i - bears) > 0));
+    if (isSpace && (bunnies > 0))
+        return 0;                   // can enter
+    if (!isSpace && (bunnies > 0))
+        return 1;                   // NO space
+
+    return 2;                       // no bunnies
 }
 
-void LamportAlgorithm::takeAlkohol(int animals, int bears, int pos){
-    if ( (bears > 0) && ( (animals - bears) > 0) && (pos > 0))
-        if (pos <= bears)
+void LamportAlgorithm::takeAlkohol(int animals, int bunnies, int pos){
+    if ( (bunnies > 0) && ( (animals - bunnies) > 0) && (pos > 0))
+        if (pos < (animals - bunnies))
             Parametry::me->alkohol++;
 }
 
 void LamportAlgorithm::mustWait(){
+    cout << "\033[32m" << "CZEKAM\t" << "\033[0m" << endl;
     receive();
 }
 
@@ -219,7 +236,6 @@ string LamportAlgorithm::showMsgType(int TAG){
 LamportAlgorithm::LamportAlgorithm()
 {
     clock = new LamportClock(Parametry::my_id);
-    Parametry::me->polana = rand () % Parametry::pojemnosc;
 }
 
 LamportAlgorithm::~LamportAlgorithm()

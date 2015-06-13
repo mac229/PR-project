@@ -1,6 +1,8 @@
 #ifndef ZWIERZ_H
 #define ZWIERZ_H
 
+#include <ctime>
+
 class  Zwierz
 {
    public:

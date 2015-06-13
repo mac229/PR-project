@@ -43,7 +43,7 @@ class LamportAlgorithm
 
 	void sorting();
 
-	bool canEnter();
+	int canEnter();
 	void takeAlkohol(int animals, int bears, int pos);
 
 	void mustWait();
