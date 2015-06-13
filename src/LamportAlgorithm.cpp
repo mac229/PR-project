@@ -123,14 +123,14 @@ void LamportAlgorithm::gettedRequest(Message msg){
 void LamportAlgorithm::gettedWantToo(Message msg){
     gettedResponses++;
     addToList(msg.processID, msg.processTime, msg.size);
-
-    // TODO: not wait for all
-        // sort
-        // canEnter
+    if (canEnter() == 0)
+        gettedResponses = Parametry::processes;
 }
 
 void LamportAlgorithm::gettedDontWant(Message msg){
     gettedResponses++;
+    if (canEnter() == 0)
+        gettedResponses = Parametry::processes;
 }
 
 void LamportAlgorithm::gettedLeave(Message msg){
@@ -140,6 +140,8 @@ void LamportAlgorithm::gettedLeave(Message msg){
                 clockList.erase(clockList.begin() + i);
                 break;
             }
+    if (canEnter() == 0)
+        gettedResponses = Parametry::processes;
     //showList(clockList);
 }
 
@@ -173,7 +175,7 @@ int LamportAlgorithm::canEnter(){
     if (isSpace && (bunnies > 0))
         return 0;                   // can enter
     if (!isSpace && (bunnies > 0))
-        return 1;                   // NO space
+        return 1;                   // no space
 
     return 2;                       // no bunnies
 }

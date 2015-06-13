@@ -14,9 +14,9 @@ int main(int argc, char** argv) {
 
         LamportAlgorithm *l = new LamportAlgorithm();
 
-        while (true)
+        l->start();
+        while (false)
             l->start();
-
 
     } else {
         cout << "Podano zle argumenty" << endl;
