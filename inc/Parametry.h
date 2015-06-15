@@ -15,9 +15,9 @@
 #include "../inc/Zwierz.h"
 
 #define REQUEST 100
-#define WANT_TOO 300
-#define DONT_WANT 400
-#define LEAVE 500
+#define WANT_TOO 200
+#define DONT_WANT 300
+#define LEAVE 400
 
 using namespace std;
 

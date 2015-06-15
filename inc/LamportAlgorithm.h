@@ -42,6 +42,7 @@ class LamportAlgorithm
 	void gettedLeave(Message msg);
 
 	void sorting();
+	void tryEnter();
 
 	int canEnter();
 	bool willBeBunnie(int number, int emptySpace);
@@ -53,7 +54,7 @@ class LamportAlgorithm
 	void enterToCriticalSection();
         void leaveCriticalSection();
 
-	Message createMessage();
+	Message createMessage(int TAG);
 	string showMsgType(int TAG);
 	void addToList(int id, int time, int size);
 };

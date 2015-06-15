@@ -20,23 +20,7 @@ void LamportAlgorithm::start(){
     sendToAll(REQUEST);
     receiveFromAll();
     sorting();
-
-    int flag = -1;
-    do {
-       flag = canEnter();
-       if (flag == 0){
-            enterToCriticalSection();
-            leaveCriticalSection();
-       }
-
-       if (flag == 1)
-            mustWait();
-
-       if (flag == 2)
-           sendToAll(LEAVE);
-    }
-    while ( flag == 1);
-
+    tryEnter();
 }
 
 void LamportAlgorithm::resetValues(){
@@ -63,13 +47,28 @@ void LamportAlgorithm::sendToAll(int TAG){
 }
 
 void LamportAlgorithm::send(int TO, int TAG){
-    Message msg = createMessage();
+    Message msg = createMessage(TAG);
     clock->increment();
     MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, TO, TAG);
 
     cout << "SEND->" << showMsgType(TAG) << "\t"
     << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
     " wysyla komunikat do procesu: " << TO << endl;
+}
+
+Message LamportAlgorithm::createMessage(int TAG){
+    Message msg;
+
+    msg.processID = clock->getID();
+    msg.size = Parametry::me->wielkosc;
+    msg.meadow = Parametry::me->polana;
+    if ((TAG == REQUEST) || (TAG == WANT_TOO))
+        msg.processTime = wantParty;
+    else
+        msg.processTime = clock->getTime();
+
+
+    return msg;
 }
 
 void LamportAlgorithm::receiveFromAll(){
@@ -150,16 +149,48 @@ void LamportAlgorithm::sorting(){
     //showList(clockList);
 }
 
+void LamportAlgorithm::tryEnter(){
+    int flag = -1;
+
+    cout << "\033[33m" << "TRY TO ENTER\t" << "\033[0m"
+    << "Proces: " << clock->getID() << " sprawdza mozliwosc wejscia na polane: " << Parametry::me->polana << endl;
+
+    do {
+       flag = canEnter();
+       if (flag == 0){
+            enterToCriticalSection();
+            leaveCriticalSection();
+       }
+
+       if (flag == 1){
+            cout << "\033[34m" << "NO SPACE\t" << "\033[0m"
+            << "Proces: " << clock->getID() << " czas: " << clock->getTime() << " czeka na zwolnienie miejsca" << endl;
+
+            mustWait();
+        }
+
+       if (flag == 2){
+            cout << "\033[34m" << "NO BUNNIES\t" << "\033[0m"
+            << "Proces: " << clock->getID() << " czas: " << clock->getTime() << " rezygnuje z imprezy" << endl;
+
+            sendToAll(LEAVE);
+        }
+    }
+    while ( flag == 1);
+}
+
 int LamportAlgorithm::canEnter(){
     unsigned int i = 0, bunnies = 0;
     int emptySpace = Parametry::pojemnosc;
     bool isSpace = false;
     int myPosition = -1;
 
+ //   showList(clockList);
+
     for (i = 0; i < clockList.size(); i++){
         if ((emptySpace - clockList[i][2]) >= 0){
             bool onList = false;
-
+//            cout << "\033[35m" << "ID: " << clock->getID() << " JESTEM: " << i << "\033[0m" << endl;
             if (bunnies == 0) {
                 if ((clockList[i][2] == 4) && (willBeBunnie(i + 1, emptySpace - 4))){
                     emptySpace -= clockList[i][2];
@@ -190,7 +221,7 @@ int LamportAlgorithm::canEnter(){
         return 0;                   // can enter
     if (!isSpace && (bunnies > 0))
         return 1;                   // no space
-    cout << "\033[33m" << "NO BUNNIES\t" << "\033[0m" << endl;
+
     return 2;                       // no bunnies
 }
 
@@ -210,7 +241,6 @@ void LamportAlgorithm::takeAlkohol(int animals, int bunnies, int pos){
 }
 
 void LamportAlgorithm::mustWait(){
-    cout << "\033[33m" << "CZEKAM\t" << "\033[0m" << endl;
     receive();
 }
 
@@ -224,22 +254,12 @@ void LamportAlgorithm::enterToCriticalSection(){
 
 void LamportAlgorithm::leaveCriticalSection(){
     clock->increment();
-    sendToAll(LEAVE);
 
     cout << "\033[31m" << "LEAVE\t" << "\033[0m"
     << "Proces: " << clock->getID() << " opuszcza sekcje krytyczna z czasem: "
     << clock->getTime() << endl;
-}
 
-Message LamportAlgorithm::createMessage(){
-    Message msg;
-
-    msg.processID = clock->getID();
-    msg.processTime = wantParty;
-    msg.size = Parametry::me->wielkosc;
-    msg.meadow = Parametry::me->polana;
-
-    return msg;
+    sendToAll(LEAVE);
 }
 
 string LamportAlgorithm::showMsgType(int TAG){
