@@ -44,8 +44,10 @@ class LamportAlgorithm
 	void sorting();
 
 	int canEnter();
+	bool willBeBunnie(int number, int emptySpace);
 	void takeAlkohol(int animals, int bears, int pos);
 
+	void noWait();
 	void mustWait();
 
 	void enterToCriticalSection();

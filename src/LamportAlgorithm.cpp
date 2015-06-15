@@ -64,12 +64,11 @@ void LamportAlgorithm::sendToAll(int TAG){
 
 void LamportAlgorithm::send(int TO, int TAG){
     Message msg = createMessage();
-
-    MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, TO, TAG);
     clock->increment();
+    MPI::COMM_WORLD.Send(&msg, sizeof(struct Message), MPI_BYTE, TO, TAG);
 
     cout << "SEND->" << showMsgType(TAG) << "\t"
-    << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() <<
+    << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
     " wysyla komunikat do procesu: " << TO << endl;
 }
 
@@ -87,7 +86,7 @@ void LamportAlgorithm::receive(){
     clock->checkAndSet(msg.processTime);
 
     cout << "RECV->" << showMsgType(status.Get_tag()) << "\t"
-    << "Proces: " << clock->getID() << " o czasie: " << clock->getTime() <<
+    << "Proces: " << clock->getID() << " z czasem: " << clock->getTime() <<
     " otrzymal od procesu: " << msg.processID << " z jego czasem: " << msg.processTime << endl;
 
     makeAction(msg, status.Get_tag());
@@ -123,14 +122,12 @@ void LamportAlgorithm::gettedRequest(Message msg){
 void LamportAlgorithm::gettedWantToo(Message msg){
     gettedResponses++;
     addToList(msg.processID, msg.processTime, msg.size);
-    if (canEnter() == 0)
-        gettedResponses = Parametry::processes;
+    //noWait();
 }
 
 void LamportAlgorithm::gettedDontWant(Message msg){
     gettedResponses++;
-    if (canEnter() == 0)
-        gettedResponses = Parametry::processes;
+    //noWait();
 }
 
 void LamportAlgorithm::gettedLeave(Message msg){
@@ -140,9 +137,12 @@ void LamportAlgorithm::gettedLeave(Message msg){
                 clockList.erase(clockList.begin() + i);
                 break;
             }
+    //noWait();
+}
+
+void LamportAlgorithm::noWait(){
     if (canEnter() == 0)
         gettedResponses = Parametry::processes;
-    //showList(clockList);
 }
 
 void LamportAlgorithm::sorting(){
@@ -158,16 +158,30 @@ int LamportAlgorithm::canEnter(){
 
     for (i = 0; i < clockList.size(); i++){
         if ((emptySpace - clockList[i][2]) >= 0){
-            if (clockList[i][0] == clock->getID()){
+            bool onList = false;
+
+            if (bunnies == 0) {
+                if ((clockList[i][2] == 4) && (willBeBunnie(i + 1, emptySpace - 4))){
+                    emptySpace -= clockList[i][2];
+                    onList = true;
+                }
+                else if (clockList[i][2] == 1){
+                    emptySpace -= clockList[i][2];
+                    bunnies++;
+                    onList = true;
+                }
+            } else {
+                emptySpace -= clockList[i][2];
+                onList = true;
+                if (clockList[i][2] == 1)
+                    bunnies++;
+            }
+
+            if ( onList && (clockList[i][0] == clock->getID())){
                 isSpace = true;
                 myPosition = i;
             }
-            if (clockList[i][2] == 1)
-                bunnies++;
-
-            emptySpace -= clockList[i][2];
-        } else
-            break;
+        }
     }
 
     takeAlkohol(i, bunnies, myPosition);
@@ -176,8 +190,17 @@ int LamportAlgorithm::canEnter(){
         return 0;                   // can enter
     if (!isSpace && (bunnies > 0))
         return 1;                   // no space
-
+    cout << "\033[33m" << "NO BUNNIES\t" << "\033[0m" << endl;
     return 2;                       // no bunnies
+}
+
+bool LamportAlgorithm::willBeBunnie(int number, int emptySpace){
+    for (unsigned int i = number; i < clockList.size(); i++){
+        if (((emptySpace - clockList[i][2]) >= 0) && (clockList[i][2] == 1)){
+            return true;
+        }
+    }
+    return false;
 }
 
 void LamportAlgorithm::takeAlkohol(int animals, int bunnies, int pos){
@@ -187,24 +210,23 @@ void LamportAlgorithm::takeAlkohol(int animals, int bunnies, int pos){
 }
 
 void LamportAlgorithm::mustWait(){
-    cout << "\033[32m" << "CZEKAM\t" << "\033[0m" << endl;
+    cout << "\033[33m" << "CZEKAM\t" << "\033[0m" << endl;
     receive();
 }
 
 void LamportAlgorithm::enterToCriticalSection(){
     clock->increment();
 
-    cout << "\033[31m" << "ENTER\t" << "\033[0m"
+    cout << "\033[32m" << "ENTER\t" << "\033[0m"
     << "Proces: " << clock->getID() << " wchodzi do sekcji krytycznej z czasem: "
     << clock->getTime() << " i z liczba butelek: " << Parametry::me->alkohol << endl;
 }
 
 void LamportAlgorithm::leaveCriticalSection(){
     clock->increment();
-
     sendToAll(LEAVE);
 
-    cout << "LEAVE\t"
+    cout << "\033[31m" << "LEAVE\t" << "\033[0m"
     << "Proces: " << clock->getID() << " opuszcza sekcje krytyczna z czasem: "
     << clock->getTime() << endl;
 }
