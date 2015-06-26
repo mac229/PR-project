@@ -28,7 +28,7 @@ void Parametry::createMe(){
         me = new Niedzwiedz();
     else
         me = new Zajaczek();
-    me->polana = rand() % polany;
+    me->polana = rand() % pojemnosc;
 }
 
 void Parametry::setParameters(char * argv[]){
