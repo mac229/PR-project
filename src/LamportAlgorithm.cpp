@@ -121,12 +121,10 @@ void LamportAlgorithm::gettedRequest(Message msg){
 void LamportAlgorithm::gettedWantToo(Message msg){
     gettedResponses++;
     addToList(msg.processID, msg.processTime, msg.size);
-    //noWait();
 }
 
 void LamportAlgorithm::gettedDontWant(Message msg){
     gettedResponses++;
-    //noWait();
 }
 
 void LamportAlgorithm::gettedLeave(Message msg){
@@ -136,7 +134,6 @@ void LamportAlgorithm::gettedLeave(Message msg){
                 clockList.erase(clockList.begin() + i);
                 break;
             }
-    //noWait();
 }
 
 void LamportAlgorithm::noWait(){
@@ -190,7 +187,6 @@ int LamportAlgorithm::canEnter(){
     for (i = 0; i < clockList.size(); i++){
         if ((emptySpace - clockList[i][2]) >= 0){
             bool onList = false;
-//            cout << "\033[35m" << "ID: " << clock->getID() << " JESTEM: " << i << "\033[0m" << endl;
             if (bunnies == 0) {
                 if ((clockList[i][2] == 4) && (willBeBunnie(i + 1, emptySpace - 4))){
                     emptySpace -= clockList[i][2];
@@ -235,7 +231,7 @@ bool LamportAlgorithm::willBeBunnie(int number, int emptySpace){
 }
 
 void LamportAlgorithm::takeAlkohol(int animals, int bunnies, int pos){
-    if ( (bunnies > 0) && ( (animals - bunnies) > 0) && (pos > 0))
+    if ( (bunnies > 0) && ( (animals - bunnies) > 0) && (pos >= 0))
         if (pos < (animals - bunnies))
             Parametry::me->alkohol++;
 }
